@@ -14,7 +14,7 @@
         <appender-ref ref="main"/>
     </category>
 
-    <category name="tutorial">
+    <category name="Artifact_SA">
         <priority value="INFO"/>
         <appender-ref ref="main"/>
     </category>
