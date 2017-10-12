@@ -6,7 +6,6 @@ import org.repodriller.Study;
 import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
-import org.repodriller.scm.GitRepository;
 
 
 public class RefactorStudy implements Study 
@@ -19,15 +18,14 @@ public class RefactorStudy implements Study
 	public void execute() {
 		new RepositoryMining()
 			.in(
-					//GitRepository.singleProject("/Users/mauricioaniche/Desktop/tutorial/jfreechart-fse")
 					GitRemoteRepository
-					.hostedOn("https://github.com/SonarSource/sonarqube.git")
+					.hostedOn("https://github.com/tuplejump/MapDB.git")
 					.inTempDir("/temp")
 					.asBareRepos()
 					.buildAsSCMRepository()
 					)
 			.through(Commits.all())
-			.process(new DevelopersVisitor(), new CSVFile("/Users/Dplen/Documents/Software_Analytics/Artifact_SA/data.data.csv"))
+			.process(new DevelopersVisitor(), new CSVFile("../dataMAPDB.csv"))
 			.mine();
 	}
 }

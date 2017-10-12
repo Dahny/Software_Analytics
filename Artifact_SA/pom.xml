@@ -15,6 +15,13 @@
   </properties>
 
   <dependencies>
+  	<dependency>
+    <groupId>sample</groupId>
+    <artifactId>com.sample</artifactId>
+    <version>1.0</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/lib/ck-0.2.1-SNAPSHOT.jar</systemPath>
+		</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -32,6 +39,11 @@
 		<artifactId>commons-io</artifactId>
 		<version>2.4</version>
 	</dependency>
-		
+		<!-- https://mvnrepository.com/artifact/com.github.mauricioaniche/ck -->
+  <dependency>
+      <groupId>com.github.mauricioaniche</groupId>
+      <artifactId>ck</artifactId>
+      <version>0.2.0</version>
+  </dependency>
   </dependencies>
 </project>
