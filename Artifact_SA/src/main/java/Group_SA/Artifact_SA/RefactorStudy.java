@@ -21,7 +21,6 @@ public class RefactorStudy implements Study
 					GitRemoteRepository
 					.hostedOn("https://github.com/tuplejump/MapDB.git")
 					.inTempDir("/temp")
-					.asBareRepos()
 					.buildAsSCMRepository()
 					)
 			.through(Commits.all())

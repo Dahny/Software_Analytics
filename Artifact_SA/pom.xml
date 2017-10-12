@@ -15,13 +15,13 @@
   </properties>
 
   <dependencies>
-  	<dependency>
-    <groupId>sample</groupId>
-    <artifactId>com.sample</artifactId>
-    <version>1.0</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/ck-0.2.1-SNAPSHOT.jar</systemPath>
-		</dependency>
+  	<!--<dependency>
+	    <groupId>sample</groupId>
+	    <artifactId>com.sample</artifactId>
+	    <version>1.0</version>
+	    <scope>system</scope>
+	    <systemPath>${project.basedir}/lib/ck-0.2.1-SNAPSHOT.jar</systemPath>
+	</dependency>-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

@@ -11,31 +11,44 @@ import org.repodriller.scm.CommitVisitor;
 import org.repodriller.scm.SCMRepository;
 
 import com.github.mauricioaniche.ck.CK;
+import com.github.mauricioaniche.ck.CKReport;
 
 public class DevelopersVisitor implements CommitVisitor {
-
+	
+	static final String repoPath = "C:\\Temp\\MapDB\\"; // C:/temp/...
+	
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
-		
-//	    System.out.println("A WOLLAH");
-//	    for(Modification mod : commit.getModifications()) {
-//	      if(mod.getType().equals(ModificationType.MODIFY)) {
-//	        System.out.println(ck.calculate(mod.getNewPath()));
-//	      }
-//	    }
-		
-		List<String> sourceC0de = new ArrayList<String>();
-		for(Modification mod: commit.getModifications()){
-			if(mod.getType().equals(ModificationType.MODIFY)){
-				sourceC0de.add(mod.getSourceCode());
-			}
+		CK ck = new CK();
+	    
+		try {
+			repo.getScm().checkout(commit.getHash());
+			for(Modification mod : commit.getModifications()) {
+		      if(mod.getType().equals(ModificationType.MODIFY) && mod.getNewPath().endsWith(".java")) {
+		    	  
+		    	StringBuilder path = new StringBuilder(repoPath); 
+		    	String[] parts = mod.getNewPath().split("/", -1);
+		    	String fileName = parts[parts.length-1];
+		    	parts[parts.length-1] = "";
+		    	for(String part : parts) {
+		    		path.append(part).append("\\");
+		    	}
+		    	path.delete(path.length() - 2, path.length() - 1);
+		    	System.out.println("PATH: " + path);
+		    	CKReport report = ck.calculate(path.toString());
+		    	System.err.println(report.get(path.toString()+fileName));
+		      
+		      }
+		    }
+		} finally {
+			repo.getScm().reset();
 		}
 		
-		System.out.println(repo.getScm().files().size());
+	    
+	
 		writer.write(	
 			commit.getAuthor().getName(),
-			commit.getAuthor().getEmail(),
-			sourceC0de
+			commit.getAuthor().getEmail()
 		);
 
 	}
