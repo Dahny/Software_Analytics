@@ -1,4 +1,4 @@
-package Group_SA.Artifact_SA;
+package DynamicDuo.Study;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,11 +10,12 @@ import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
+import DynamicDuo.Visitors.MetricsVisitor;
+import DynamicDuo.Visitors.RefactoringsVisitor;
+
 
 public class RefactorStudy implements Study 
 {
-	public static final String repository = "https://github.com/SonarSource/sonarqube.git"; //"https://github.com/tuplejump/MapDB.git"
-	public static final String repo_name = "sonarqube";
 	
     public static void main(String[] args) {
 		new RepoDriller().start(new RefactorStudy());
@@ -28,15 +29,19 @@ public class RefactorStudy implements Study
 			from.setTime(sdf.parse("2017:05:01"));
 			Calendar to = Calendar.getInstance();
 			to.setTime(sdf.parse("2018:06:01"));
+			
 			new RepositoryMining()
 				.in(
 						GitRemoteRepository
-						.hostedOn(repository)
-						.inTempDir("/temp")
+						.hostedOn(StudyConstants.Repo_Url)
+						.inTempDir(StudyConstants.Repo_Path_Relative)
 						.buildAsSCMRepository()
 						)
 				.through(Commits.betweenDates(from, to))
-				.process(new DevelopersVisitor(), new CSVFile("../dataMAPDB.csv"))
+				//get refactors
+				.process(new RefactoringsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "refactors"))) 
+				//get ck metrics
+				.process(new MetricsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "metrics")))		
 				.mine();
 			}
 		catch(Exception e) {
