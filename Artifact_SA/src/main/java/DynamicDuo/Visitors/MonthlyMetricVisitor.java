@@ -23,34 +23,24 @@ import DynamicDuo.RefactoringUtils.IdentifiedRefactorCommitsHolder;
 import DynamicDuo.Study.RefactorStudy;
 import DynamicDuo.Study.StudyConstants;
 
-public class MetricsVisitor implements CommitVisitor {
+public class MonthlyMetricVisitor implements CommitVisitor {
 	
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {		
 		try {
 			CK ck = new CK();
-			if(IdentifiedRefactorCommitsHolder.getInstance().isIdentifiedRefactorCommit(commit.getHash())) {
-				//we are dealing with a commit that contained refactors
-			} 
+			StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute); 
+			path.append(StudyConstants.Repo_Name);
 			
 			repo.getScm().checkout(commit.getHash());
-			for(Modification mod : commit.getModifications()) {
-		      if(mod.getType().equals(ModificationType.MODIFY) && mod.getNewPath().endsWith(".java")) {
-		    	  
-		    	StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute); 
-		    	String[] parts = mod.getNewPath().split("/", -1);
-		    	String fileName = parts[parts.length-1];
-		    	parts[parts.length-1] = "";
-		    	for(String part : parts) {
-		    		path.append(part).append("\\");
-		    	}
-		    	path.delete(path.length() - 2, path.length() - 1);
-		    	System.out.println("PATH: " + path);
-		    	CKReport report = ck.calculate(path.toString());
-		    	System.err.println(report.get(path.toString()+fileName));
-		      }
-		    }
-			
+			CKReport report = ck.calculate(path.toString());
+			//TODO: 
+			//parse report
+			//CALCULATE MAINAINABILITY
+			//find test-prod pairs
+			//write pairs to file
+			//write pairs+metrics to file
+//			writer.write();
 		} 
 		catch(Exception e) {
 			e.printStackTrace();
@@ -59,16 +49,13 @@ public class MetricsVisitor implements CommitVisitor {
 			repo.getScm().reset();
 		}
 
-//		writer.write(	
-//			commit.getAuthor().getName(),
-//			commit.getAuthor().getEmail()
-//		);
+
 
 	}
 
 	@Override
 	public String name() {
-		return "MetricsVisitor";
+		return "MonthlyMetricsVisitor";
 	}
 
 }

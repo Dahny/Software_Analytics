@@ -1,5 +1,7 @@
 package DynamicDuo.Visitors;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jgit.lib.Repository;
@@ -8,8 +10,11 @@ import org.refactoringminer.api.GitHistoryRefactoringMiner;
 import org.refactoringminer.api.GitService;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringHandler;
+import org.refactoringminer.api.RefactoringType;
 import org.refactoringminer.rm1.GitHistoryRefactoringMinerImpl;
+import org.refactoringminer.rm2.model.refactoring.SDRefactoring;
 import org.refactoringminer.util.GitServiceImpl;
+import org.refactoringminer.utils.RefactoringRelationship;
 import org.repodriller.domain.Commit;
 import org.repodriller.domain.Modification;
 import org.repodriller.domain.ModificationType;
@@ -23,6 +28,7 @@ import DynamicDuo.RefactoringUtils.IdentifiedRefactorCommitsHolder;
 import DynamicDuo.RefactoringUtils.RefactoringMinerRepository;
 import DynamicDuo.Study.RefactorStudy;
 import DynamicDuo.Study.StudyConstants;
+import DynamicDuo.Study.StudyUtils;
 
 public class RefactoringsVisitor implements CommitVisitor {
 	
@@ -35,6 +41,14 @@ public class RefactoringsVisitor implements CommitVisitor {
 			refMinerInstance.getMiner().detectAtCommit(refMinerInstance.getRepository(), null, commit.getHash(), new RefactoringHandler() {
 				@Override
 				public void handle(String commitId, List<Refactoring> refactorings) {
+					for(Refactoring ref : refactorings) {
+						Collection<RefactoringRelationship> refactoringRelationships = new ArrayList<RefactoringRelationship>();
+						RefactoringType.parse(ref.toString().replace("\t"," "),refactoringRelationships);
+						for(RefactoringRelationship refrel : refactoringRelationships) {
+							String mainEntityName = refrel.getMainEntity();
+							System.out.println("TESTCLASS CHECK --> " + mainEntityName + " == " + StudyUtils.isTestClass(mainEntityName));
+						}
+					}
 					String rfString = getRefactorsString(refactorings);
 					if(rfString != null) {
 						//add commit to commits-holder for later reference

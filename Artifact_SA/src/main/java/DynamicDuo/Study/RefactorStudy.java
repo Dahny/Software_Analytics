@@ -11,6 +11,7 @@ import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
 import DynamicDuo.Visitors.MetricsVisitor;
+import DynamicDuo.Visitors.MonthlyMetricVisitor;
 import DynamicDuo.Visitors.RefactoringsVisitor;
 
 
@@ -23,6 +24,24 @@ public class RefactorStudy implements Study
 	
 	@Override
 	public void execute() {
+		//processMonthlyMetricsAndClassPairs();	
+		processRefactorCommitsAndTheirMetrics();
+	}
+	
+	private void processMonthlyMetricsAndClassPairs() {
+		new RepositoryMining()
+		.in(
+			GitRemoteRepository
+			.hostedOn(StudyConstants.Repo_Url)
+			.inTempDir(StudyConstants.Repo_Path_Relative)
+			.buildAsSCMRepository()
+			)
+		.through(Commits.monthly(0))
+		.process(new MonthlyMetricVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "MonthlyMetrics"))) 
+		.mine();
+	}
+	
+	private void processRefactorCommitsAndTheirMetrics() {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:mm:dd");
 			Calendar from = Calendar.getInstance();
@@ -32,16 +51,16 @@ public class RefactorStudy implements Study
 			
 			new RepositoryMining()
 				.in(
-						GitRemoteRepository
-						.hostedOn(StudyConstants.Repo_Url)
-						.inTempDir(StudyConstants.Repo_Path_Relative)
-						.buildAsSCMRepository()
-						)
+					GitRemoteRepository
+					.hostedOn(StudyConstants.Repo_Url)
+					.inTempDir(StudyConstants.Repo_Path_Relative)
+					.buildAsSCMRepository()
+					)
 				.through(Commits.betweenDates(from, to))
 				//get refactors
 				.process(new RefactoringsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "refactors"))) 
 				//get ck metrics
-				.process(new MetricsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "metrics")))		
+				//.process(new MetricsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "metrics")))		
 				.mine();
 			}
 		catch(Exception e) {
