@@ -24,7 +24,9 @@ import org.repodriller.scm.SCMRepository;
 import com.github.mauricioaniche.ck.CK;
 import com.github.mauricioaniche.ck.CKReport;
 
+import DynamicDuo.RefactoringUtils.HalsteadExtractor;
 import DynamicDuo.RefactoringUtils.IdentifiedRefactorCommitsHolder;
+import DynamicDuo.RefactoringUtils.RefactorHandler;
 import DynamicDuo.RefactoringUtils.RefactoringMinerRepository;
 import DynamicDuo.Study.RefactorStudy;
 import DynamicDuo.Study.StudyConstants;
@@ -37,26 +39,26 @@ public class RefactoringsVisitor implements CommitVisitor {
 		RefactoringMinerRepository refMinerInstance = RefactoringMinerRepository.getInstance();
 		try {
 			//repo.getScm().getCommit(commit.getHash()).getParent()
+			for(Modification m : commit.getModifications()) {
+				if(!m.getFileName().endsWith(".java")) {continue;}
+				String sourceCode = m.getSourceCode();
+				System.out.println(sourceCode);
+				HalsteadExtractor.traverseAST(sourceCode);
+			}
 			
-			refMinerInstance.getMiner().detectAtCommit(refMinerInstance.getRepository(), null, commit.getHash(), new RefactoringHandler() {
-				@Override
-				public void handle(String commitId, List<Refactoring> refactorings) {
-					for(Refactoring ref : refactorings) {
-						Collection<RefactoringRelationship> refactoringRelationships = new ArrayList<RefactoringRelationship>();
-						RefactoringType.parse(ref.toString().replace("\t"," "),refactoringRelationships);
-						for(RefactoringRelationship refrel : refactoringRelationships) {
-							String mainEntityName = refrel.getMainEntity();
-							System.out.println("TESTCLASS CHECK --> " + mainEntityName + " == " + StudyUtils.isTestClass(mainEntityName));
-						}
-					}
-					String rfString = getRefactorsString(refactorings);
-					if(rfString != null) {
-						//add commit to commits-holder for later reference
-						IdentifiedRefactorCommitsHolder.getInstance().addRefactorCommit(commitId);
-						writer.write(commitId, rfString);
-					}
-				}
-			});
+//			refMinerInstance.getMiner().detectAtCommit(refMinerInstance.getRepository(), null, commit.getHash(), new RefactoringHandler() {
+//				@Override
+//				public void handle(String commitId, List<Refactoring> refactorings) {
+//					RefactorHandler.handleRefactors(commit.getHash(), refactorings);
+//					
+//					String rfString = getRefactorsString(refactorings);
+//					if(rfString != null) {
+//						//add commit to commits-holder for later reference
+//						IdentifiedRefactorCommitsHolder.getInstance().addRefactorCommit(commitId);
+//						writer.write(commitId, rfString);
+//					}
+//				}
+//			});
 		} catch(NullPointerException e) {
 			//commit-related data was not found on disk :/
 			e.printStackTrace();

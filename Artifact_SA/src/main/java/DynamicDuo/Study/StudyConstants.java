@@ -8,4 +8,6 @@ public class StudyConstants {
 	public static final String Repo_Path_Relative = "\\Temp";
 	
 	public static final char CSV_Delimiter = ',';
+	
+	public static final String CSV_ALL_REFACTORS_Path = "../"+StudyConstants.Repo_Name+"-all-test-refactors.csv";
 }

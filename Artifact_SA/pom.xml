@@ -45,5 +45,12 @@
       <artifactId>ck</artifactId>
       <version>0.2.0</version>
   </dependency> -->
+  <!-- https://mvnrepository.com/artifact/org.eclipse.jdt/core -->
+<dependency>
+    <groupId>org.eclipse.jdt</groupId>
+    <artifactId>core</artifactId>
+    <version>3.3.0-v_771</version>
+</dependency>
+  
   </dependencies>
 </project>
