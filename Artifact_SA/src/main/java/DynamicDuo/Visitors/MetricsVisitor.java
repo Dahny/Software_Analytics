@@ -29,15 +29,15 @@ public class MetricsVisitor implements CommitVisitor {
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {		
 		try {
 			CK ck = new CK();
-			if(IdentifiedRefactorCommitsHolder.getInstance().isIdentifiedRefactorCommit(commit.getHash())) {
-				//we are dealing with a commit that contained refactors
-			} 
+//			if(IdentifiedRefactorCommitsHolder.getInstance().isIdentifiedRefactorCommit(commit.getHash())) {
+//				//we are dealing with a commit that contained refactors
+//			} 
 			
 			repo.getScm().checkout(commit.getHash());
 			for(Modification mod : commit.getModifications()) {
 		      if(mod.getType().equals(ModificationType.MODIFY) && mod.getNewPath().endsWith(".java")) {
 		    	  
-		    	StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute); 
+		    	StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute + "sonarqube\\"); 
 		    	String[] parts = mod.getNewPath().split("/", -1);
 		    	String fileName = parts[parts.length-1];
 		    	parts[parts.length-1] = "";

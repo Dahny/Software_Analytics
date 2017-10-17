@@ -12,6 +12,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -39,18 +41,12 @@
 		<artifactId>commons-io</artifactId>
 		<version>2.4</version>
 	</dependency>
-		<!-- https://mvnrepository.com/artifact/com.github.mauricioaniche/ck -->
-  <!-- <dependency>
-      <groupId>com.github.mauricioaniche</groupId>
-      <artifactId>ck</artifactId>
-      <version>0.2.0</version>
-  </dependency> -->
-  <!-- https://mvnrepository.com/artifact/org.eclipse.jdt/core -->
-<dependency>
-    <groupId>org.eclipse.jdt</groupId>
-    <artifactId>core</artifactId>
-    <version>3.3.0-v_771</version>
-</dependency>
+  	<!-- https://mvnrepository.com/artifact/org.eclipse.jdt/core -->
+	<dependency>
+	    <groupId>org.eclipse.jdt</groupId>
+	    <artifactId>core</artifactId>
+	    <version>3.3.0-v_771</version>
+	</dependency>
   
   </dependencies>
 </project>
