@@ -1,15 +1,5 @@
 package DynamicDuo.Visitors;
 
-import java.util.List;
-
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.refactoringminer.api.GitHistoryRefactoringMiner;
-import org.refactoringminer.api.GitService;
-import org.refactoringminer.api.Refactoring;
-import org.refactoringminer.api.RefactoringHandler;
-import org.refactoringminer.rm1.GitHistoryRefactoringMinerImpl;
-import org.refactoringminer.util.GitServiceImpl;
 import org.repodriller.domain.Commit;
 import org.repodriller.domain.Modification;
 import org.repodriller.domain.ModificationType;
@@ -19,11 +9,21 @@ import org.repodriller.scm.SCMRepository;
 import com.github.mauricioaniche.ck.CK;
 import com.github.mauricioaniche.ck.CKReport;
 
-import DynamicDuo.RefactoringUtils.IdentifiedRefactorCommitsHolder;
-import DynamicDuo.Study.RefactorStudy;
 import DynamicDuo.Study.StudyConstants;
 
 public class MetricsVisitor implements CommitVisitor {
+	/**
+	 * 
+	 * 
+	 * 
+	 * 
+	 * WE PROBABLY DONT EVEN NEED THIS CLASS
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
+	
 	
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {		
@@ -37,7 +37,7 @@ public class MetricsVisitor implements CommitVisitor {
 			for(Modification mod : commit.getModifications()) {
 		      if(mod.getType().equals(ModificationType.MODIFY) && mod.getNewPath().endsWith(".java")) {
 		    	  
-		    	StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute + "sonarqube\\"); 
+		    	StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute + StudyConstants.Repo_Name +"\\"); 
 		    	String[] parts = mod.getNewPath().split("/", -1);
 		    	String fileName = parts[parts.length-1];
 		    	parts[parts.length-1] = "";

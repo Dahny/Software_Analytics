@@ -99,10 +99,10 @@ public class HalsteadVisitor extends ASTVisitor{
 	public HalsteadVisitor() {
 	}
 	
-	public void printResults() {
-		System.out.println("MEASURES");
-		System.out.println(N1() + "--" + N2());
-		System.out.println(n1() + "--" + n2());
+	public double getHalsteadVolume() {
+		int N = N1() + N2();
+		int n = n1() + n2();
+		return N * (Math.log(n)/Math.log(2));
 	}
 	
 	private void operator(ASTNode node) {

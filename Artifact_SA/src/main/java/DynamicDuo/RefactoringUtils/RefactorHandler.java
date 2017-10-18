@@ -6,26 +6,33 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringType;
 import org.refactoringminer.utils.RefactoringRelationship;
+import org.repodriller.persistence.PersistenceMechanism;
 
 import DynamicDuo.Study.StudyConstants;
 import DynamicDuo.Study.StudyUtils;
 
 public class RefactorHandler {
 	
+	//probably trash this..
+	public static void handleMaintainabilityImprovingRefactors(String commitHash, List<Refactoring> refactorings, PersistenceMechanism writer) {
+	}
 	
-	
-	public static void handleRefactors(String commitHash, List<Refactoring> refactorings) {
+	public static void handleTestRefactors(String commitHash, List<Refactoring> refactorings) {
+		Set<String> affectedEntities = new HashSet<String>();
 		for(Refactoring ref : refactorings) {
 			Collection<RefactoringRelationship> refactoringRelationships = new ArrayList<RefactoringRelationship>();
 			RefactoringType.parse(ref.toString().replace("\t"," "),refactoringRelationships);
 			for(RefactoringRelationship refrel : refactoringRelationships) {
 				String mainEntityName = refrel.getMainEntity();		
-				if(StudyUtils.isTestClass(mainEntityName)) {
+				if(StudyUtils.isTestClass(mainEntityName) && !affectedEntities.contains(mainEntityName)) {
+					affectedEntities.add(mainEntityName);
 					//conditions statisfied for RQ1
 					writeRQ1Output(buildRQ1Output(commitHash, mainEntityName, ref));
 				}

@@ -11,6 +11,7 @@ import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
 import DynamicDuo.Visitors.MetricsVisitor;
+import DynamicDuo.Visitors.MonthlyMetricVisitor;
 import DynamicDuo.Visitors.RefactoringsVisitor;
 
 
@@ -23,25 +24,43 @@ public class RefactorStudy implements Study
 	
 	@Override
 	public void execute() {
+		//processMonthlyMetricsAndClassPairs();	
+		processRefactorCommitsAndTheirMetrics();
+	}
+	
+	private void processMonthlyMetricsAndClassPairs() {
+		new RepositoryMining()
+		.in(
+			GitRemoteRepository
+			.hostedOn(StudyConstants.Repo_Url)
+			.inTempDir(StudyConstants.Repo_Path_Relative)
+			.buildAsSCMRepository()
+			)
+		.through(Commits.monthly(0))
+		.process(new MonthlyMetricVisitor(), new CSVFile(StudyConstants.CSV_Monthly_Metrics)) 
+		.mine();
+	}
+	
+	private void processRefactorCommitsAndTheirMetrics() {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:mm:dd");
 			Calendar from = Calendar.getInstance();
-			from.setTime(sdf.parse("2017:05:01"));
+			from.setTime(sdf.parse("2016:05:01"));
 			Calendar to = Calendar.getInstance();
 			to.setTime(sdf.parse("2018:06:01"));
 			
 			new RepositoryMining()
 				.in(
-						GitRemoteRepository
-						.hostedOn(StudyConstants.Repo_Url)
-						.inTempDir(StudyConstants.Repo_Path_Relative)
-						.buildAsSCMRepository()
-						)
-				.through(Commits.monthly(1))
+					GitRemoteRepository
+					.hostedOn(StudyConstants.Repo_Url)
+					.inTempDir(StudyConstants.Repo_Path_Relative)
+					.buildAsSCMRepository()
+					)
+				.through(Commits.betweenDates(from, to))
 				//get refactors
-				//.process(new RefactoringsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "refactors"))) 
+				.process(new RefactoringsVisitor(), new CSVFile(StudyConstants.CSV_Refactors)) 
 				//get ck metrics
-				.process(new MetricsVisitor(), new CSVFile(String.format("../%s-%s.csv", StudyConstants.Repo_Name, "metrics")))		
+				//.process(new MetricsVisitor(), new CSVFile(StudyConstants.CSV_Metrics))		
 				.mine();
 			}
 		catch(Exception e) {

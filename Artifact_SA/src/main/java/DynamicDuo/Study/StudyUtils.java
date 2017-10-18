@@ -9,13 +9,16 @@ import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.github.mauricioaniche.ck.CK;
+import com.github.mauricioaniche.ck.CKNumber;
+import com.github.mauricioaniche.ck.CKReport;
+
 public class StudyUtils {
 
 	public static boolean isTestClass(String className) {
 		boolean test = false;
 		String[] parts = className.toLowerCase().split("\\.");
 		for (String part : parts) {
-			System.out.println(part);
 			test = test || part.endsWith("test");
 		}
 		return test;
@@ -77,5 +80,51 @@ public class StudyUtils {
 		
 		return "no testfile found";
 	}
+	
+	public static int getMaintainabilityIndex(int loc, int wmc, double hsv) {
+		return (int)Math.round(Math.max(0, (171 - (5.2*Math.log(hsv)) - (0.23*wmc) -  (16.2*Math.log(loc)))*100 / 171));
+	}
+	
+	public static CKNumber getMetricsForFile(String pathToFile) {
+		CK ck = new CK();
+		String path = StudyUtils.getPathToContainingFolder(pathToFile);
+		String fileName = StudyUtils.getFileNameFromPath(pathToFile);
+		CKReport report = ck.calculate(path);
+    	return report.get(path.toString()+fileName);
+	}
+	
+	public static String getPathToContainingFolder(String pathToFile) {
+		StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute + StudyConstants.Repo_Name +"\\"); 
+    	String[] parts = pathToFile.split("/", -1);
+    	parts[parts.length-1] = "";
+    	for(String part : parts) {
+    		path.append(part).append("\\");
+    	}
+    	path.delete(path.length() - 2, path.length() - 1);
+    	return path.toString();
+	}
 
+	public static String getFileNameFromPath(String pathToFile) {
+    	String[] parts = pathToFile.split("/", -1);
+    	return parts[parts.length-1];
+	}
+	
+	public static String getAbsolutePathToFile(String pathToFile) {
+		return getPathToContainingFolder(pathToFile) + getFileNameFromPath(pathToFile);
+	}
+	
+	public static String getClassPathFromNameSpace(String namespace) {
+		String reverseClassNamespace = new StringBuffer(namespace).reverse().toString().split(".", 1)[0];
+		String classNameSpace = new StringBuffer(reverseClassNamespace).reverse().toString();
+		return classNameSpace.replace('.', '/')+".java";
+	}
+	
+	public static String getClassPathFromRefactoringDescription(String description) {
+		String[] refStringParts = description.split("in class ");//index 1 should contain the class namespace
+		if(refStringParts.length > 1) {
+			return getClassPathFromNameSpace(refStringParts[1]);
+		}
+		return null;
+	}
+	
 }
