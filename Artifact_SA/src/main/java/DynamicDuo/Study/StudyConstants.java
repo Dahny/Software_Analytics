@@ -13,4 +13,7 @@ public class StudyConstants {
 	public static final String CSV_Monthly_Metrics = String.format("../%s-%s.csv", StudyConstants.Repo_Name, "monthly-metrics");
 	public static final String CSV_Refactors = String.format("../%s-%s.csv", StudyConstants.Repo_Name, "refactors");
 	public static final String CSV_Metrics = String.format("../%s-%s.csv", StudyConstants.Repo_Name, "metrics");
+	
+	public static final int Commits_To_Skip_In_Delayed_Checker = 10;
+	public static final int Versions_To_Check_In_Delayed_Checker = 5;
 }

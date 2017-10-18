@@ -44,9 +44,7 @@ public class RefactoringsVisitor implements CommitVisitor {
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
 		RefactoringMinerRepository refMinerInstance = RefactoringMinerRepository.getInstance();
-		try {
-			//repo.getScm().getCommit(commit.getHash()).getParent()
-			
+		try {			
 			
 			refMinerInstance.getMiner().detectAtCommit(refMinerInstance.getRepository(), null, commit.getHash(), new RefactoringHandler() {
 				@Override

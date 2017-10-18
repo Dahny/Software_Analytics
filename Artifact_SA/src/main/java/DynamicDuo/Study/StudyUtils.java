@@ -24,14 +24,6 @@ public class StudyUtils {
 		return test;
 	}
 	
-	public static void writeLineToCsv(String pathToCsv, String content) throws IOException {
-		Path csvPath = Paths.get(pathToCsv);
-		if(Files.notExists(csvPath, LinkOption.NOFOLLOW_LINKS)) {
-			Files.createFile(csvPath);
-		}
-		Files.write(csvPath, (content+"\n").getBytes(), StandardOpenOption.APPEND);
-	}
-	
 	public static boolean isMethod(String entityName) {
 		//only a function namespace will contain brackets
 		return entityName.contains("(") && entityName.contains(")");
@@ -89,6 +81,7 @@ public class StudyUtils {
 		CK ck = new CK();
 		String path = StudyUtils.getPathToContainingFolder(pathToFile);
 		String fileName = StudyUtils.getFileNameFromPath(pathToFile);
+		System.out.println("CALCULATING CK FOR FILES ON: " + path);
 		CKReport report = ck.calculate(path);
     	return report.get(path.toString()+fileName);
 	}

@@ -17,6 +17,7 @@ import org.repodriller.persistence.PersistenceMechanism;
 
 import DynamicDuo.Study.StudyConstants;
 import DynamicDuo.Study.StudyUtils;
+import DynamicDuo.Utils.CsvFileWriter;
 
 public class RefactorHandler {
 	
@@ -42,7 +43,7 @@ public class RefactorHandler {
 	
 	private static void writeRQ1Output(String csvLine) {
 		try {
-			StudyUtils.writeLineToCsv(StudyConstants.CSV_ALL_REFACTORS_Path, csvLine);
+			CsvFileWriter.writeLineToCsv(StudyConstants.CSV_ALL_REFACTORS_Path, csvLine);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
