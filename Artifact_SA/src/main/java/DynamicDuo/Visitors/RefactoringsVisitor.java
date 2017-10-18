@@ -52,7 +52,7 @@ public class RefactoringsVisitor implements CommitVisitor {
 					if(refactorings.isEmpty()) {return;}//instantly skip if no refactorings found
 					
 					//call simple function to handle datacollection for RQ1
-					RefactorHandler.handleTestRefactors(commit.getHash(), refactorings);
+					RefactorHandler.handleTestRefactors(commitId, refactorings);
 					
 					//proceed with more complex procedure for RQ2
 					List<CommitAndParentModel> commitAndParentModels = new ArrayList<CommitAndParentModel>();
@@ -73,7 +73,7 @@ public class RefactoringsVisitor implements CommitVisitor {
 						CKNumber metrics = StudyUtils.getMetricsForFile(filePath);
 						int mi = StudyUtils.getMaintainabilityIndex(metrics.getLoc(), metrics.getWmc(), hsv);
 						
-						CommitAndParentModel dataModel = new CommitAndParentModel(commit.getHash(), ref);
+						CommitAndParentModel dataModel = new CommitAndParentModel(commitId, ref);
 						dataModel.setFileInfo(filePath, StudyUtils.getFileNameFromPath(filePath));
 						dataModel.setCommitData(hsv, metrics, mi);
 						commitAndParentModels.add(dataModel);
@@ -96,7 +96,7 @@ public class RefactoringsVisitor implements CommitVisitor {
 							
 							//proceed to track matching prod file!! (or do mi/parentmi diff?)
 							if(dataModel.maintainabilityImproved()) { //we dont care to track files that actually got worse
-								IdentifiedRefactorCommitsHolder.getInstance().addRefactorCommit(commit.getHash());
+								IdentifiedRefactorCommitsHolder.getInstance().addRefactorCommit(commitId);
 							}
 							//...
 						} catch (IOException e) {
