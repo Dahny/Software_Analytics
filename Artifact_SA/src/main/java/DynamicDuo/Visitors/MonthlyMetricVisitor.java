@@ -1,5 +1,6 @@
 package DynamicDuo.Visitors;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,7 +27,8 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 			path.append(StudyConstants.Repo_Name);
 
 			repo.getScm().checkout(commit.getHash());
-			String commitDate = parseDate(commit.getDate().getTime());
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+			String commitDate = sdf.format(commit.getDate().getTime());
 			CKReport report = ck.calculate(path.toString());
 
 			// parse report
@@ -47,8 +49,7 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 					if (!pair.equals("no testfile found")) {
 						// write pairs to file
 						CsvFileWriter.writeLineToCsv(
-								"C:\\Users\\Dplen\\Documents\\Software_Analytics\\Artifact_SA\\data\\PairDataSonarQube.csv",
-								ckn.getFile() + ", " + pair);
+								StudyConstants.CSV_Class_Pairs,ckn.getFile() + StudyConstants.CSV_Delimiter + pair);
 					}
 				}
 
