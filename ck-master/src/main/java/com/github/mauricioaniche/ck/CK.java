@@ -69,17 +69,21 @@ public class CK {
 		log.info("Max partition size: " + MAX_AT_ONCE + ", total partitions=" + partitions.size());
 
 		for(List<String> partition : partitions) {
-			log.info("Next partition");
-			ASTParser parser = ASTParser.newParser(AST.JLS8);
-			
-			parser.setResolveBindings(true);
-			parser.setBindingsRecovery(true);
-			
-			Map<?, ?> options = JavaCore.getOptions();
-			JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
-			parser.setCompilerOptions(options);
-			parser.setEnvironment(null, srcDirs, null, true);
-			parser.createASTs(partition.toArray(new String[partition.size()]), null, new String[0], storage, null);
+			try {
+				log.info("Next partition");
+				ASTParser parser = ASTParser.newParser(AST.JLS8);
+				
+				parser.setResolveBindings(true);
+				parser.setBindingsRecovery(true);
+				
+				Map<?, ?> options = JavaCore.getOptions();
+				JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
+				parser.setCompilerOptions(options);
+				parser.setEnvironment(null, srcDirs, null, true);
+				parser.createASTs(partition.toArray(new String[partition.size()]), null, new String[0], storage, null);
+			}catch(Exception e) {
+				//okay there was a file which was messed up, fuck it just do the rest and skip this partition
+			}
 		}
 		
 		log.info("Finished parsing");
