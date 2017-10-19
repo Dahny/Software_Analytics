@@ -18,7 +18,8 @@ public class StudyUtils {
 		boolean test = false;
 		String[] parts = className.toLowerCase().split("\\.");
 		for (String part : parts) {
-			test = test || part.endsWith("test");
+			test = test || part.endsWith("test") || part.startsWith("test") || part.endsWith("tests")
+					|| part.startsWith("tests");
 		}
 		return test;
 	}

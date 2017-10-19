@@ -44,7 +44,6 @@ public class MetricsExecutor extends FileASTRequestor {
 				visitor.execute(cu, result, report);
 				visitor.setResult(result);
 			}
-			log.info(result);
 			report.add(result);
 		} catch(Exception e) {
 			if(result!=null) result.error();

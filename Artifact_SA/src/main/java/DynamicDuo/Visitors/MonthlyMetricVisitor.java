@@ -1,5 +1,8 @@
 package DynamicDuo.Visitors;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.repodriller.domain.Commit;
 import org.repodriller.persistence.PersistenceMechanism;
 import org.repodriller.scm.CommitVisitor;
@@ -23,6 +26,7 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 			path.append(StudyConstants.Repo_Name);
 
 			repo.getScm().checkout(commit.getHash());
+			String commitDate = parseDate(commit.getDate().getTime());
 			CKReport report = ck.calculate(path.toString());
 
 			// parse report
@@ -36,7 +40,7 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 
 				// find test-prod pairs
 				String fileType = "TestFile";
-				if (!StudyUtils.isTestClass(ckn.getFile())) {
+				if (!StudyUtils.isTestClass(ckn.getClassName())) {
 					fileType = "ProductionFile";
 					String pair = StudyUtils.findTestPair(ckn.getFile());
 
@@ -50,18 +54,26 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 
 				// Write -> fileType, absolute file path, MaintainabilityIndex,
 				// [ALL CK METRICS].
-				writer.write(fileType, ckn.getFile(), mtnIndex, ckn.getCbo(), ckn.getDit(), ckn.getNoc(), ckn.getNof(),
-						ckn.getNopf(), ckn.getNosf(), ckn.getNom(), ckn.getNopm(), ckn.getNosm(), ckn.getNosi(),
-						ckn.getRfc(), ckn.getWmc(), ckn.getLoc(), ckn.getLcom());
+				writer.write(commit.getHash(), commitDate, fileType, ckn.getFile(), mtnIndex, hsv, ckn.getCbo(),
+						ckn.getDit(), ckn.getNoc(), ckn.getNof(), ckn.getNopf(), ckn.getNosf(), ckn.getNom(),
+						ckn.getNopm(), ckn.getNosm(), ckn.getNosi(), ckn.getRfc(), ckn.getWmc(), ckn.getLoc(),
+						ckn.getLcom());
 
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			//Thread.
 			repo.getScm().reset();
 		}
 
+	}
+
+	public String parseDate(Date date) {
+		String parsedDate = "";
+		parsedDate += date.getDay() + "-";
+		parsedDate += date.getMonth() + "-";
+		parsedDate += date.getYear();
+		return parsedDate;
 	}
 
 	@Override
