@@ -27,7 +27,7 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 			path.append(StudyConstants.Repo_Name);
 
 			repo.getScm().checkout(commit.getHash());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			String commitDate = sdf.format(commit.getDate().getTime());
 			CKReport report = ck.calculate(path.toString());
 
@@ -48,8 +48,8 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 
 					if (!pair.equals("no testfile found")) {
 						// write pairs to file
-						CsvFileWriter.writeLineToCsv(
-								StudyConstants.CSV_Class_Pairs,ckn.getFile() + StudyConstants.CSV_Delimiter + pair);
+						CsvFileWriter.writeLineToCsv(StudyConstants.CSV_Class_Pairs, commit.getHash()
+								+ StudyConstants.CSV_Delimiter + ckn.getFile() + StudyConstants.CSV_Delimiter + pair);
 					}
 				}
 
@@ -67,14 +67,6 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 			repo.getScm().reset();
 		}
 
-	}
-
-	public String parseDate(Date date) {
-		String parsedDate = "";
-		parsedDate += date.getDay() + "-";
-		parsedDate += date.getMonth() + "-";
-		parsedDate += date.getYear();
-		return parsedDate;
 	}
 
 	@Override
