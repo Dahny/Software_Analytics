@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -59,6 +63,35 @@ public class StudyUtils {
 		return findTestFile(path.toString(), name);
 	}
 
+	public static String findTestPairElastic(String prodName) {
+		boolean elasticsearch = false;
+		String[] parts = prodName.toString().toLowerCase().split("\\\\");
+
+		for (String part : parts) {
+			elasticsearch = elasticsearch || part.equals("elasticsearch");
+		}
+
+		StringBuilder path = new StringBuilder();
+		if (elasticsearch) {
+			boolean notFound = true;
+
+			for (String part : parts) {
+				path.append(part);
+				if (path.toString().endsWith("elasticsearch")) {
+					notFound = false;
+					break;
+				}
+				path.append("\\");
+			}
+			if (notFound) {
+				return "no testfile found";
+			}
+		}
+		String name = parts[parts.length - 1];
+		name = name.substring(0, name.length() - 5);
+		return findTestFile(path.toString(), name);
+	}
+
 	public static boolean fileExists(String path) {
 		File f = new File(path);
 		return f.exists();
@@ -68,7 +101,11 @@ public class StudyUtils {
 		String testPath = "no testfile found";
 		try (Stream<Path> paths = Files.walk(Paths.get(path))) {
 			Optional<Path> opt = paths
-					.filter(p -> p.getFileName().toString().toLowerCase().equals(prodName + "test.java")).findFirst();
+					.filter(p -> (p.getFileName().toString().toLowerCase().equals(prodName + "test.java")
+							|| p.getFileName().toString().toLowerCase().equals(prodName + "tests.java")
+							|| p.getFileName().toString().toLowerCase().equals("test" + prodName + ".java")
+							|| p.getFileName().toString().toLowerCase().equals("tests" + prodName + ".java")))
+					.findFirst();
 
 			if (opt.isPresent()) {
 				testPath = opt.get().toString();
