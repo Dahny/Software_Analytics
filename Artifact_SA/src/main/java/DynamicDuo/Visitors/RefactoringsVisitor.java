@@ -31,8 +31,10 @@ import com.github.mauricioaniche.ck.CKNumber;
 import com.github.mauricioaniche.ck.CKReport;
 
 import DynamicDuo.Models.CommitAndParentModel;
+import DynamicDuo.Models.FileMetricsModel;
+import DynamicDuo.RefactoringUtils.DelayedFutureFileVersionChecker;
 import DynamicDuo.RefactoringUtils.HalsteadExtractor;
-import DynamicDuo.RefactoringUtils.IdentifiedRefactorCommitsHolder;
+import DynamicDuo.RefactoringUtils.ProductionClassPairRepository;
 import DynamicDuo.RefactoringUtils.RefactorHandler;
 import DynamicDuo.RefactoringUtils.RefactoringMinerRepository;
 import DynamicDuo.Study.RefactorStudy;
@@ -49,6 +51,9 @@ public class RefactoringsVisitor implements CommitVisitor {
 			refMinerInstance.getMiner().detectAtCommit(refMinerInstance.getRepository(), null, commit.getHash(), new RefactoringHandler() {
 				@Override
 				public void handle(String commitId, List<Refactoring> refactorings) {
+					//first make delayedchecker check files that need to be tracked..
+					DelayedFutureFileVersionChecker.getInstance().doCheck();
+					
 					if(refactorings.isEmpty()) {return;}//instantly skip if no refactorings found
 					
 					//call simple function to handle datacollection for RQ1
@@ -65,55 +70,78 @@ public class RefactoringsVisitor implements CommitVisitor {
 						if(shouldSkipClass(mod, affectedFiles)) { continue; }
 						affectedFiles.add(mod.getFileName());
 						
-						String filePath = mod.getNewPath();
+						String filePath = mod.getNewPath() != null || mod.getNewPath() != "" ? mod.getNewPath() : mod.getOldPath();
 						
 						//1. current commit metrics of file..
-						String sourceCode = mod.getSourceCode();
-						double hsv = HalsteadExtractor.calculateHalsteadVolume(sourceCode);
-						CKNumber metrics = StudyUtils.getMetricsForFile(filePath);
-						int mi = StudyUtils.getMaintainabilityIndex(metrics.getLoc(), metrics.getWmc(), hsv);
+						FileMetricsModel mm;
+						try{
+							mm = new FileMetricsModel(filePath, mod.getSourceCode());
+						} catch(Exception e) {
+							//okay so the file was not found so this object failed to instantiate..
+							//skip and continue
+							System.err.println("FAILED TO INSTANTIATE MM IN STEP 1, SKIPPING");
+							continue;
+						}
 						
 						CommitAndParentModel dataModel = new CommitAndParentModel(commitId, ref);
 						dataModel.setFileInfo(filePath, StudyUtils.getFileNameFromPath(filePath));
-						dataModel.setCommitData(hsv, metrics, mi);
+						dataModel.setCommitData(mm.getHalsteadVolume(), mm.getMetrics(), mm.getMaintainabilityIndex());
 						commitAndParentModels.add(dataModel);
 					}
+					if(commitAndParentModels.isEmpty()) { return; } //stop here if nothing worth looking at came up.
 					
 					//2. go to parent version
-					repo.getScm().checkout(commit.getParent());
-					
+					while(true) {
+						try {
+							repo.getScm().reset();
+							repo.getScm().checkout(commit.getParent());
+							break;
+						} catch(Exception e) {
+							//probably a lock failure..
+							try {
+								System.err.println("Failed to checkout --> " + commit.getParent());
+								Thread.sleep(1000);
+								continue;
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					}
 					for(CommitAndParentModel dataModel : commitAndParentModels) {
-						try {	
+						String testClass = dataModel.getFilePath().toLowerCase().startsWith("c:") ? dataModel.getFilePath() : StudyConstants.Repo_Path_Absolute + StudyConstants.Repo_Name + "\\" + dataModel.getFilePath().replace('/', '\\');
+						String productionClass = ProductionClassPairRepository.getInstance().getPairedProductionClass(testClass);
+						//first check if theres a prod pair found, if not we can discard this data..
+						if(productionClass == null) {
+							System.out.println("MISSING PROD FILE!!");
+							System.out.println(testClass);
+						}
+						if(productionClass != null) {
+							System.out.println("PERFORMING PARENT CHECK FOR: test = " + testClass + " AND production= "+productionClass);
+							
 							//3. parent commit metrics of file
-							String sourceCode = new String(Files.readAllBytes(Paths.get(StudyUtils.getAbsolutePathToFile(dataModel.getFilePath()))));
-							double hsv = HalsteadExtractor.calculateHalsteadVolume(sourceCode);
-							CKNumber metrics = StudyUtils.getMetricsForFile(dataModel.getFilePath());
-							int mi = StudyUtils.getMaintainabilityIndex(metrics.getLoc(), metrics.getWmc(), hsv);
-							dataModel.setParentCommitData(hsv, metrics, mi);
+							FileMetricsModel mm;
+							try{
+								mm = new FileMetricsModel(testClass);
+							} catch(Exception e) {
+								//okay so the file was not found so this object failed to instantiate..
+								//skip and continue
+								System.err.println("FAILED TO INSTANTIATE MM IN STEP 3, SKIPPING");
+								continue;
+							}								
+							
+							dataModel.setParentCommitData(mm.getHalsteadVolume(), mm.getMetrics(), mm.getMaintainabilityIndex());
 							
 							//4. write metrics and parent metrics to file..
 							writer.write(dataModel.toCSVString());
 							
 							//proceed to track matching prod file!! (or do mi/parentmi diff?)
-							if(dataModel.maintainabilityImproved()) { //we dont care to track files that actually got worse
-								IdentifiedRefactorCommitsHolder.getInstance().addRefactorCommit(commitId);
-							}
-							//...
-						} catch (IOException e) {
-							//Most likely failed to get the file from parent commit.. skip and continue
-							continue;
+							System.out.println("SETTING UP DELAYED CHECKER: commitId = "+commitId + " AND prodClass = "+productionClass);
+							DelayedFutureFileVersionChecker.getInstance().trackFile(productionClass, commitId);
 						}
-						
 					}
 					
-					//check maintainability
-					//check maintainability of parent
-					//if difference > TBD {
-					//	fetch prod pair from list (if not present, break;)
-					//	add commit to commitsholder (and reference prod file && current commithash)
-					//	track prod code maintainability
-					//	
-					//}
+					
 				}
 			});
 		} catch(NullPointerException e) {
@@ -127,8 +155,8 @@ public class RefactoringsVisitor implements CommitVisitor {
 	}
 
 	private boolean shouldSkipClass(Modification mod, Set<String> affectedFiles) {
-		return mod == null
-				|| !mod.getFileName().toLowerCase().endsWith("test.java") //its not a testfile, skip it.
+		return mod == null 
+				|| !StudyUtils.isPathToTestClass(mod.getFileName().replace(".java", "")) //its not a testfile, skip it.
 				|| mod.getType().equals(ModificationType.DELETE) //its a deletion, skip it
 				|| !mod.getFileName().endsWith(".java") //its not a javafile, skip it
 				|| affectedFiles.contains(mod.getFileName()); //we already processed it, skip it

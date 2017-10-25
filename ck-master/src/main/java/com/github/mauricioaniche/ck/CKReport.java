@@ -13,11 +13,11 @@ public class CKReport {
 	}
 
 	public void add(CKNumber ck) {
-		results.put(ck.getFile(), ck);
+		results.put(ck.getFile().toLowerCase(), ck);
 	}
 
 	public CKNumber get(String name) {
-		return results.get(name);
+		return results.get(name.toLowerCase());
 	}
 
 	public Collection<CKNumber> all() {

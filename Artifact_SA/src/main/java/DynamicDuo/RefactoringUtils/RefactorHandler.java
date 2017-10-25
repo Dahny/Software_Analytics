@@ -15,9 +15,9 @@ import org.refactoringminer.api.RefactoringType;
 import org.refactoringminer.utils.RefactoringRelationship;
 import org.repodriller.persistence.PersistenceMechanism;
 
+import DynamicDuo.IO.IOHandler;
 import DynamicDuo.Study.StudyConstants;
 import DynamicDuo.Study.StudyUtils;
-import DynamicDuo.Utils.CsvFileWriter;
 
 public class RefactorHandler {
 	
@@ -29,7 +29,12 @@ public class RefactorHandler {
 		Set<String> affectedEntities = new HashSet<String>();
 		for(Refactoring ref : refactorings) {
 			Collection<RefactoringRelationship> refactoringRelationships = new ArrayList<RefactoringRelationship>();
-			RefactoringType.parse(ref.toString().replace("\t"," "),refactoringRelationships);
+			try{
+				RefactoringType.parse(ref.toString().replace("\t"," "),refactoringRelationships);
+			} catch(Exception e) {
+				//failed to parse, log it and continue..
+				e.printStackTrace();
+			}
 			for(RefactoringRelationship refrel : refactoringRelationships) {
 				String mainEntityName = refrel.getMainEntity();		
 				if(StudyUtils.isTestClass(mainEntityName) && !affectedEntities.contains(mainEntityName)) {
@@ -43,7 +48,7 @@ public class RefactorHandler {
 	
 	private static void writeRQ1Output(String csvLine) {
 		try {
-			CsvFileWriter.writeLineToCsv(StudyConstants.CSV_ALL_REFACTORS_Path, csvLine);
+			IOHandler.writeLineToCsv(StudyConstants.CSV_ALL_REFACTORS_Path, csvLine);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

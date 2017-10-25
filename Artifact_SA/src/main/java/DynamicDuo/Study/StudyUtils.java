@@ -28,6 +28,16 @@ public class StudyUtils {
 		return test;
 	}
 
+	public static boolean isPathToTestClass(String className) {
+		boolean test = false;
+		String[] parts = className.toLowerCase().split("/");
+		for (String part : parts) {
+			test = test || part.endsWith("test") || part.startsWith("test") || part.endsWith("tests")
+					|| part.startsWith("tests");
+		}
+		return test;
+	}
+	
 	public static boolean isMethod(String entityName) {
 		// only a function namespace will contain brackets
 		return entityName.contains("(") && entityName.contains(")");
@@ -143,7 +153,8 @@ public class StudyUtils {
 	}
 
 	public static String getPathToContainingFolder(String pathToFile) {
-		StringBuilder path = new StringBuilder(StudyConstants.Repo_Path_Absolute + StudyConstants.Repo_Name + "\\");
+		String basePath = StudyConstants.Repo_Path_Absolute + StudyConstants.Repo_Name + "\\";
+		StringBuilder path = pathToFile.toLowerCase().startsWith("c:") ? new StringBuilder() : new StringBuilder(basePath);
 		String[] parts = pathToFile.split("/", -1);
 		parts[parts.length - 1] = "";
 		for (String part : parts) {

@@ -20,7 +20,7 @@ public class FileUtils {
 		File f = new File(path);
 		if(f.getName().equals(".git")) return;
 		
-		for(File inside : f.listFiles()) {
+		for(File inside : f.listFiles() != null ? f.listFiles() : new File[0]) {
 			if(inside.isDirectory()) {
 				String newDir = inside.getAbsolutePath();
 				dirs.add(newDir);
@@ -43,7 +43,7 @@ public class FileUtils {
 		File f = new File(path);
 		if(f.getName().equals(".git")) return;
 		
-		for(File inside : f.listFiles()) {
+		for(File inside : f.listFiles() != null ? f.listFiles() : new File[0]) {
 			if(inside.isDirectory()) {
 				String newDir = inside.getAbsolutePath();
 				getAllJavaFiles(newDir, files);

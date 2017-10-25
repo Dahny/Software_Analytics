@@ -12,10 +12,10 @@ import com.github.mauricioaniche.ck.CK;
 import com.github.mauricioaniche.ck.CKNumber;
 import com.github.mauricioaniche.ck.CKReport;
 
+import DynamicDuo.IO.IOHandler;
 import DynamicDuo.RefactoringUtils.HalsteadExtractor;
 import DynamicDuo.Study.StudyConstants;
 import DynamicDuo.Study.StudyUtils;
-import DynamicDuo.Utils.CsvFileWriter;
 
 public class MonthlyMetricVisitor implements CommitVisitor {
 
@@ -48,7 +48,7 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 
 					if (!pair.equals("no testfile found")) {
 						// write pairs to file
-						CsvFileWriter.writeLineToCsv(StudyConstants.CSV_Class_Pairs, commit.getHash()
+						IOHandler.writeLineToCsv(StudyConstants.CSV_Class_Pairs, commit.getHash()
 								+ StudyConstants.CSV_Delimiter + ckn.getFile() + StudyConstants.CSV_Delimiter + pair);
 					}
 				}

@@ -1,10 +1,16 @@
 package DynamicDuo.Models;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.refactoringminer.api.Refactoring;
 
 import com.github.mauricioaniche.ck.CKNumber;
 
+import DynamicDuo.RefactoringUtils.HalsteadExtractor;
 import DynamicDuo.Study.StudyConstants;
+import DynamicDuo.Study.StudyUtils;
 
 
 public class CommitAndParentModel {
@@ -51,15 +57,20 @@ public class CommitAndParentModel {
 		return filePath;
 	}
 	
-	public boolean maintainabilityImproved() {
-		return p_halsteadVolume > halsteadVolume;
-	}
-	
 	public String toCSVString() {
 		final char comma = StudyConstants.CSV_Delimiter;
 		return commitHash + comma + filePath + comma + fileName //commit and file details
-				+ comma + halsteadVolume + comma + metrics.getLoc() + comma + metrics.getWmc() + comma + maintainabilityIndex //current commit metrics
-				+ comma + p_halsteadVolume + comma + p_metrics.getLoc() + comma + p_metrics.getWmc() + comma + p_maintainabilityIndex //parent commit metrics
+				//current commit metrics
+				+ comma + maintainabilityIndex + comma + halsteadVolume + comma + metrics.getCbo() + comma + metrics.getDit() 
+				+ comma + metrics.getNoc() + comma + metrics.getNof()+ comma + metrics.getNopf()+ comma + metrics.getNosf()+ comma 
+				+ metrics.getNom() + comma + metrics.getNopm() + comma + metrics.getNosm() + comma + metrics.getNosi() + comma 
+				+ metrics.getRfc()+ comma +metrics.getWmc() + comma + metrics.getLoc() + comma + metrics.getLcom()  
+				//parent commit metrics
+				+ comma + p_maintainabilityIndex + comma + p_halsteadVolume + comma + p_metrics.getCbo() + comma + p_metrics.getDit() 
+				+ comma + p_metrics.getNoc() + comma + p_metrics.getNof()+ comma + p_metrics.getNopf()+ comma + p_metrics.getNosf()+ comma 
+				+ p_metrics.getNom() + comma + p_metrics.getNopm() + comma + p_metrics.getNosm() + comma + p_metrics.getNosi() + comma 
+				+ p_metrics.getRfc()+ comma +p_metrics.getWmc() + comma + p_metrics.getLoc() + comma + p_metrics.getLcom() //parent commit metrics
 				+ comma + refactoring.getRefactoringType().getDisplayName() + comma + refactoring.toString(); //finally some info on the refactor
 	}
+	
 }
