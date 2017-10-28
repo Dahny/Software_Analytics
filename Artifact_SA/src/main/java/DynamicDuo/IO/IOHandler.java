@@ -19,9 +19,6 @@ public class IOHandler {
 	
 	public static void readLines(String pathToCsv, LineHandler lineHandler) throws IOException {
 		Path csvPath = Paths.get(pathToCsv);
-		if(Files.notExists(csvPath, LinkOption.NOFOLLOW_LINKS)) {
-			return;
-		}
 		for(String line : Files.readAllLines(csvPath)){
 			lineHandler.handle(line);
 		}
