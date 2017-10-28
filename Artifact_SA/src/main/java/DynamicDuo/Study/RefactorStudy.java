@@ -36,11 +36,11 @@ public class RefactorStudy implements Study
 	
 	private void processMonthlyMetricsAndClassPairs() {
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:mm:dd");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd");
 		Calendar from = Calendar.getInstance();
-		from.setTime(sdf.parse("2013:01:01"));
+		from.setTime(sdf.parse("2012:10:25"));
 		Calendar to = Calendar.getInstance();
-		to.setTime(sdf.parse("2018:12:01"));
+		to.setTime(sdf.parse("2017:10:25"));
 		new RepositoryMining()
 		.in(
 			GitRemoteRepository
@@ -59,11 +59,11 @@ public class RefactorStudy implements Study
 	
 	private void processRefactorCommitsAndTheirMetrics() {
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:mm:dd");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd");
 			Calendar from = Calendar.getInstance();
-			from.setTime(sdf.parse("2016:05:01"));
+			from.setTime(sdf.parse("2012:10:25"));
 			Calendar to = Calendar.getInstance();
-			to.setTime(sdf.parse("2018:06:01"));
+			to.setTime(sdf.parse("2017:10:25"));
 			
 			new RepositoryMining()
 				.in(
