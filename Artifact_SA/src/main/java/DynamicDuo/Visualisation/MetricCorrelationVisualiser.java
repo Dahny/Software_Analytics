@@ -29,26 +29,32 @@ import DynamicDuo.IO.LineHandler;
 import DynamicDuo.Models.ClassPairModel;
 import DynamicDuo.Study.StudyConstants;
 
-public class MICorrelationVisualiser {
+public class MetricCorrelationVisualiser {
 
 	private String classPairsFilePath;
 	private String monthlyMetricsFilePath;
 	
 	private HashMap<String, List<ClassPairModel>> commitHashToClassPairs;
-	private HashMap<String, Integer> hashClassToMaintainabilityIndex;
+	private HashMap<String, Integer> hashClassToMetric;
 	
-	private int maxMi = -1;
+	private int maxM = -1;
+	private String metricName;
+	private int colId;
 	
-	public MICorrelationVisualiser() {
+	
+	public MetricCorrelationVisualiser(String metricName, int colId) {
 		classPairsFilePath = StudyConstants.CSV_Class_Pairs;
 		monthlyMetricsFilePath = StudyConstants.CSV_Monthly_Metrics;
 		commitHashToClassPairs = new HashMap<String, List<ClassPairModel>>();
-		hashClassToMaintainabilityIndex = new HashMap<String, Integer>();
+		hashClassToMetric = new HashMap<String, Integer>();
+		
+		this.metricName = metricName;
+		this.colId = colId;
 		
 		try {
 			System.out.println("loading data");
 			loadClassPairs();
-			loadMIData();
+			loadMetricData();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -58,17 +64,18 @@ public class MICorrelationVisualiser {
 	
 	public void plot() {
 		XYDataset inputData = createDataset();
+		String plotName = StudyConstants.Repo_Name + " - " + metricName;
 		JFreeChart chart = ChartFactory.createScatterPlot(
-	            "Maintainability Indexes", // chart title
+				plotName, // chart title
 	            "test", // x axis label
 	            "production", // y axis label
-	            inputData, // data  ***-----PROBLEM------***
+	            inputData, // data
 	            PlotOrientation.HORIZONTAL,
 	            true, // include legend
 	            true, // tooltips
 	            false // urls
 	            );
-		ChartFrame frame = new ChartFrame("First", chart);
+		ChartFrame frame = new ChartFrame(plotName, chart);
 		
 		Shape diamond = ShapeUtilities.createDiamond(2);
 		XYPlot plot = (XYPlot) chart.getPlot();
@@ -101,7 +108,7 @@ public class MICorrelationVisualiser {
 		});
 	}
 	
-	private void loadMIData() throws IOException {
+	private void loadMetricData() throws IOException {
 		
 		IOHandler.readLines(monthlyMetricsFilePath, new LineHandler() {
 
@@ -111,75 +118,67 @@ public class MICorrelationVisualiser {
 				String key = cols[0]+cols[3];
 				key = key.toLowerCase();
 				
-				Integer maintainabilityIndex;
-				if(hashClassToMaintainabilityIndex.containsKey(key)) {
-					//wtf this shouldnt happen!
+				Integer metric;
+				if(hashClassToMetric.containsKey(key)) {
 					System.err.println("THIS SHOULD NOT HAPPEN");
-					maintainabilityIndex = -1;
+					metric = -1;
 				} else {
-					maintainabilityIndex = Integer.parseInt(cols[4]);
+					metric = Integer.parseInt(cols[colId]);
 				}
-				if(maintainabilityIndex > maxMi) {
-					maxMi = maintainabilityIndex;
-				}
-				hashClassToMaintainabilityIndex.put(key, maintainabilityIndex);
+				hashClassToMetric.put(key, metric);
 			}
 			
 		});
-		
-		System.out.println("MaxMi found: " +maxMi);
 	}
 	
 	
 	private XYDataset createDataset() {
 		int successCount = 0;
 		int failureCount = 0;
+		
+		maxM = 0;
+		
 	    XYSeriesCollection result = new XYSeriesCollection();
 	   	Iterator<String> hashes = commitHashToClassPairs.keySet().iterator();
-	    
+	   	XYSeries series = new XYSeries(metricName + " - " + StudyConstants.Repo_Name);
 	    while(hashes.hasNext()) {
 	    	String hash = hashes.next();
 	    	if(hashes.hasNext()) continue;
 	    	
-	    	XYSeries series = new XYSeries("MI - "+hash.substring(0, 6));
 	    	List<ClassPairModel> pairs = commitHashToClassPairs.get(hash);
 	    	for(ClassPairModel pair : pairs) {
-	    		Integer prodMi = hashClassToMaintainabilityIndex.get((hash+pair.getProductionClass()).toLowerCase());
-	    		Integer testMi = hashClassToMaintainabilityIndex.get((hash+pair.getTestClass()).toLowerCase());
-	    		if(testMi == null || prodMi == null) {
+	    		Integer prodMetric = hashClassToMetric.get((hash+pair.getProductionClass()).toLowerCase());
+	    		Integer testMetric = hashClassToMetric.get((hash+pair.getTestClass()).toLowerCase());
+	    		if(testMetric == null || prodMetric == null) {
 	    			failureCount++;
 	    			continue;
 	    		}
+	    		if(testMetric > maxM || prodMetric > maxM) {
+	    			maxM = testMetric > prodMetric ? testMetric : prodMetric;
+	    		}
 	    		successCount++;
-	    		series.add(prodMi, testMi);
+	    		series.add(prodMetric, testMetric);
 	    	}
-	    	result.addSeries(series);
+	    	
 	    }
+	    result.addSeries(series);
+		System.out.println("Max " + metricName + " found: " + maxM);
+
 	    System.out.println("Done creating dataset: " + successCount + " - " + failureCount);
 	    
 	    return result;
 	}
 	
 	private void drawRegressionLine(JFreeChart chart, XYSeriesCollection inputData) {
-		// Get the parameters 'a' and 'b' for an equation y = a + b * x,
-		// fitted to the inputData using ordinary least squares regression.
-		// a - regressionParameters[0], b - regressionParameters[1]
-		double regressionParameters[] = Regression.getOLSRegression(inputData,
-				0);
+		double regressionParameters[] = Regression.getOLSRegression(inputData,0);
+		LineFunction2D linefunction2d = new LineFunction2D(regressionParameters[0], regressionParameters[1]);
 
-		// Prepare a line function using the found parameters
-		LineFunction2D linefunction2d = new LineFunction2D(
-				regressionParameters[0], regressionParameters[1]);
-
-		// Creates a dataset by taking sample values from the line function
-		XYDataset dataset = DatasetUtilities.sampleFunction2D(linefunction2d,
-				0D, 300, 100, "Fitted Regression Line");
+		XYDataset dataset = DatasetUtilities.sampleFunction2D(linefunction2d, 0D, maxM, 1000, "Fitted Regression Line");
 
 		// Draw the line dataset
 		XYPlot xyplot = chart.getXYPlot();
 		xyplot.setDataset(1, dataset);
-		XYLineAndShapeRenderer xylineandshaperenderer = new XYLineAndShapeRenderer(
-				true, false);
+		XYLineAndShapeRenderer xylineandshaperenderer = new XYLineAndShapeRenderer(true, false);
 		xylineandshaperenderer.setSeriesPaint(0, Color.YELLOW);
 		xyplot.setRenderer(1, xylineandshaperenderer);
 	}

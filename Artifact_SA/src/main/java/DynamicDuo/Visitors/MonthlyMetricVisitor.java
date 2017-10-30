@@ -55,9 +55,9 @@ public class MonthlyMetricVisitor implements CommitVisitor {
 
 				// Write -> fileType, absolute file path, MaintainabilityIndex,
 				// [ALL CK METRICS].
-				writer.write(commit.getHash(), commitDate, fileType, ckn.getFile(), mtnIndex, hsv, ckn.getCbo(),
-						ckn.getDit(), ckn.getNoc(), ckn.getNof(), ckn.getNopf(), ckn.getNosf(), ckn.getNom(),
-						ckn.getNopm(), ckn.getNosm(), ckn.getNosi(), ckn.getRfc(), ckn.getWmc(), ckn.getLoc(),
+				writer.write(commit.getHash(), commitDate, fileType, ckn.getFile(), mtnIndex, hsv, ckn.getCbo(),	//tot 6
+						ckn.getDit(), ckn.getNoc(), ckn.getNof(), ckn.getNopf(), ckn.getNosf(), ckn.getNom(),		//tot 12
+						ckn.getNopm(), ckn.getNosm(), ckn.getNosi(), ckn.getRfc(), ckn.getWmc(), ckn.getLoc(),		//tot 18
 						ckn.getLcom());
 
 			}
