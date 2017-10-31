@@ -12,9 +12,9 @@ public class ThresholdCalculator {
 
 	private List<Integer> metrics;
 	
+	final private double _70th = 0.70d;
 	final private double _80th = 0.80d;
 	final private double _90th = 0.90d;
-	final private double _95th = 0.95d;
 	
 	public ThresholdCalculator() {
 		metrics = new ArrayList<Integer>();
@@ -27,12 +27,12 @@ public class ThresholdCalculator {
 		
 		Collections.sort(metrics);
 		//calculate 80th, 90th and 95th quantile
-		int x80th = (int) Math.ceil(_80th * metrics.size()) - 1;
-		System.out.println("80th quantile for "+colName+" = " + metrics.get(x80th) );
-		int x90th = (int) Math.ceil(_90th * metrics.size()) - 1;
-		System.out.println("90th quantile for "+colName+" = " + metrics.get(x90th) );
-		int x95th = (int) Math.ceil(_95th * metrics.size()) - 1;
-		System.out.println("95th quantile for "+colName+" = " + metrics.get(x95th) );
+		int x80th = (int) Math.ceil(_70th * metrics.size()) - 1;
+		System.out.println("70th quantile for "+colName+" = " + metrics.get(x80th) );
+		int x90th = (int) Math.ceil(_80th * metrics.size()) - 1;
+		System.out.println("80th quantile for "+colName+" = " + metrics.get(x90th) );
+		int x95th = (int) Math.ceil(_90th * metrics.size()) - 1;
+		System.out.println("90th quantile for "+colName+" = " + metrics.get(x95th) );
 		
 	}
 	

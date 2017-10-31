@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
+import org.eclipse.core.internal.resources.File;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -67,25 +71,42 @@ public class MetricCorrelationVisualiser {
 		String plotName = StudyConstants.Repo_Name + " - " + metricName;
 		JFreeChart chart = ChartFactory.createScatterPlot(
 				plotName, // chart title
-	            "test", // x axis label
-	            "production", // y axis label
+	            "production", // x axis label
+	            "test", // y axis label
 	            inputData, // data
 	            PlotOrientation.HORIZONTAL,
 	            true, // include legend
 	            true, // tooltips
 	            false // urls
 	            );
-		ChartFrame frame = new ChartFrame(plotName, chart);
 		
 		Shape diamond = ShapeUtilities.createDiamond(2);
 		XYPlot plot = (XYPlot) chart.getPlot();
+		
+		String[] str = new String[]{Category.VERY_LOW.toString(), Category.LOW.toString(), Category.MEDIUM.toString(), Category.HIGH.toString(),};
+		SymbolAxis prodAxis = new SymbolAxis("Production",str); 	      
+		prodAxis.setTickLabelsVisible(true); 
+		SymbolAxis testAxis = new SymbolAxis("Test",str); 	      
+		testAxis.setTickLabelsVisible(true); 
+
+		plot.setDomainAxis(prodAxis);
+		plot.setRangeAxis(testAxis);
+		
 		XYItemRenderer renderer = plot.getRenderer();
 		renderer.setSeriesShape(0, diamond);
+		renderer.setSeriesShape(1, diamond);
+		renderer.setSeriesShape(2, diamond);
+		renderer.setSeriesShape(3, diamond);
+		renderer.setSeriesShape(4, diamond);
 		
-		drawRegressionLine(chart,(XYSeriesCollection)inputData);
+		//drawRegressionLine(chart,(XYSeriesCollection)inputData);
 		
-        frame.pack();
-        frame.setVisible(true);
+		try {
+			ChartUtilities.saveChartAsPNG(new java.io.File("../charts/"+plotName+".png"), chart, 800, 600);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void loadClassPairs() throws IOException {
@@ -140,10 +161,16 @@ public class MetricCorrelationVisualiser {
 		
 	    XYSeriesCollection result = new XYSeriesCollection();
 	   	Iterator<String> hashes = commitHashToClassPairs.keySet().iterator();
-	   	XYSeries series = new XYSeries(metricName + " - " + StudyConstants.Repo_Name);
+	   	int totalVersions = commitHashToClassPairs.keySet().size();
+	   	int curVersion = 0;
+	   	
 	    while(hashes.hasNext()) {
+	    	curVersion++;
 	    	String hash = hashes.next();
-	    	if(hashes.hasNext()) continue;
+	    	XYSeries series = new XYSeries("pair in "+hash.substring(0,6));
+	    	
+	    	if(curVersion < Math.ceil(totalVersions/5)) continue;
+	    	else curVersion = 0;
 	    	
 	    	List<ClassPairModel> pairs = commitHashToClassPairs.get(hash);
 	    	for(ClassPairModel pair : pairs) {
@@ -157,16 +184,24 @@ public class MetricCorrelationVisualiser {
 	    			maxM = testMetric > prodMetric ? testMetric : prodMetric;
 	    		}
 	    		successCount++;
-	    		series.add(prodMetric, testMetric);
+	    		
+	    		int prodCat = CategoryAssigner.getCategory(metricName, prodMetric).ordinal();
+	    		int testCat = CategoryAssigner.getCategory(metricName, testMetric).ordinal();
+	    		series.add(prodCat+getJitter(), testCat+getJitter());
 	    	}
-	    	
+	    	result.addSeries(series);
 	    }
-	    result.addSeries(series);
+	    
 		System.out.println("Max " + metricName + " found: " + maxM);
 
 	    System.out.println("Done creating dataset: " + successCount + " - " + failureCount);
 	    
 	    return result;
+	}
+	
+	private double getJitter() {
+		Random r = new Random();
+		return -0.35d + (0.35d - -0.35d) * r.nextDouble();
 	}
 	
 	private void drawRegressionLine(JFreeChart chart, XYSeriesCollection inputData) {
