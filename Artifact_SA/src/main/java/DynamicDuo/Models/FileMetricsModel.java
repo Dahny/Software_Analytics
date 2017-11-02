@@ -27,10 +27,10 @@ public class FileMetricsModel {
 	
 	public String toCsvString() {
 		char comma = StudyConstants.CSV_Delimiter;
-		return maintainabilityIndex + comma + (halsteadVolume+"") + comma + metrics.getCbo() + comma + metrics.getDit() 
-			+ comma + metrics.getNoc() + comma + metrics.getNof()+ comma + metrics.getNopf()+ comma + metrics.getNosf()+ comma 
-			+ metrics.getNom() + comma + metrics.getNopm() + comma + metrics.getNosm() + comma + metrics.getNosi() + comma 
-			+ metrics.getRfc()+ comma +metrics.getWmc() + comma + metrics.getLoc() + comma + metrics.getLcom();
+		return maintainabilityIndex + comma + (halsteadVolume+"") + comma + metrics.getCbo() + comma + metrics.getDit() //5
+			+ comma + metrics.getNoc() + comma + metrics.getNof()+ comma + metrics.getNopf()+ comma + metrics.getNosf()+ comma //nof =7
+			+ metrics.getNom() + comma + metrics.getNopm() + comma + metrics.getNosm() + comma + metrics.getNosi() + comma //nom=10
+			+ metrics.getRfc()+ comma +metrics.getWmc() + comma + metrics.getLoc() + comma + metrics.getLcom(); //wmc=15,loc=16
 	}
 	
 	public CKNumber getMetrics() {

@@ -45,6 +45,10 @@ public class MetricCorrelationVisualiser {
 	private String metricName;
 	private int colId;
 	
+	public MetricCorrelationVisualiser() {
+		commitHashToClassPairs = new HashMap<String, List<ClassPairModel>>();
+		hashClassToMetric = new HashMap<String, Integer>();
+	}
 	
 	public MetricCorrelationVisualiser(String metricName, int colId) {
 		classPairsFilePath = StudyConstants.CSV_Class_Pairs;
@@ -102,7 +106,7 @@ public class MetricCorrelationVisualiser {
 		//drawRegressionLine(chart,(XYSeriesCollection)inputData);
 		
 		try {
-			ChartUtilities.saveChartAsPNG(new java.io.File("../charts/"+plotName+".png"), chart, 800, 600);
+			ChartUtilities.saveChartAsPNG(new java.io.File("../charts/"+plotName.replace(" ", "")+".png"), chart, 800, 600);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,7 +171,7 @@ public class MetricCorrelationVisualiser {
 	    while(hashes.hasNext()) {
 	    	curVersion++;
 	    	String hash = hashes.next();
-	    	XYSeries series = new XYSeries("pair in "+hash.substring(0,6));
+	    	XYSeries series = new XYSeries("pair in "+hash.substring(0,7));
 	    	
 	    	if(curVersion < Math.ceil(totalVersions/5)) continue;
 	    	else curVersion = 0;

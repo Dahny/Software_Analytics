@@ -62,14 +62,14 @@ public class CommitAndParentModel {
 		return commitHash + comma + filePath + comma + fileName //commit and file details
 				//current commit metrics
 				+ comma + maintainabilityIndex + comma + halsteadVolume + comma + metrics.getCbo() + comma + metrics.getDit() 
-				+ comma + metrics.getNoc() + comma + metrics.getNof()+ comma + metrics.getNopf()+ comma + metrics.getNosf()+ comma 
-				+ metrics.getNom() + comma + metrics.getNopm() + comma + metrics.getNosm() + comma + metrics.getNosi() + comma 
-				+ metrics.getRfc()+ comma +metrics.getWmc() + comma + metrics.getLoc() + comma + metrics.getLcom()  
+				+ comma + metrics.getNoc() + comma + metrics.getNof()+ comma + metrics.getNopf()+ comma + metrics.getNosf()+ comma //nof = 8
+				+ metrics.getNom() + comma + metrics.getNopm() + comma + metrics.getNosm() + comma + metrics.getNosi() + comma //nom = 11
+				+ metrics.getRfc()+ comma +metrics.getWmc() + comma + metrics.getLoc() + comma + metrics.getLcom()  //16 wmc, 17 loc
 				//parent commit metrics
 				+ comma + p_maintainabilityIndex + comma + p_halsteadVolume + comma + p_metrics.getCbo() + comma + p_metrics.getDit() 
-				+ comma + p_metrics.getNoc() + comma + p_metrics.getNof()+ comma + p_metrics.getNopf()+ comma + p_metrics.getNosf()+ comma 
-				+ p_metrics.getNom() + comma + p_metrics.getNopm() + comma + p_metrics.getNosm() + comma + p_metrics.getNosi() + comma 
-				+ p_metrics.getRfc()+ comma +p_metrics.getWmc() + comma + p_metrics.getLoc() + comma + p_metrics.getLcom() //parent commit metrics
+				+ comma + p_metrics.getNoc() + comma + p_metrics.getNof()+ comma + p_metrics.getNopf()+ comma + p_metrics.getNosf()+ comma //nof 24
+				+ p_metrics.getNom() + comma + p_metrics.getNopm() + comma + p_metrics.getNosm() + comma + p_metrics.getNosi() + comma //nom 27
+				+ p_metrics.getRfc()+ comma +p_metrics.getWmc() + comma + p_metrics.getLoc() + comma + p_metrics.getLcom() //32 wmc, 33 loc
 				+ comma + refactoring.getRefactoringType().getDisplayName() + comma + refactoring.toString(); //finally some info on the refactor
 	}
 	
