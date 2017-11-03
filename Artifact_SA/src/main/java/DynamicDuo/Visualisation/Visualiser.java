@@ -9,6 +9,4 @@ public class Visualiser {
 		//new MetricCorrelationVisualiser("MI",4).plot();
 		new MetricCorrelationVisualiser("WMC",17).plot();
 	}
-	
-	
 }

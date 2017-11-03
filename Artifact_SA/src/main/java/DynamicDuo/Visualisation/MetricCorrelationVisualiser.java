@@ -51,28 +51,28 @@ public class MetricCorrelationVisualiser {
 	}
 	
 	public MetricCorrelationVisualiser(String metricName, int colId) {
-		classPairsFilePath = StudyConstants.CSV_Class_Pairs;
-		monthlyMetricsFilePath = StudyConstants.CSV_Monthly_Metrics;
+		
 		commitHashToClassPairs = new HashMap<String, List<ClassPairModel>>();
 		hashClassToMetric = new HashMap<String, Integer>();
 		
 		this.metricName = metricName;
 		this.colId = colId;
 		
-		try {
-			System.out.println("loading data");
-			loadClassPairs();
-			loadMetricData();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			System.out.println("loading data");
+//			//loadClassPairs();
+//			//loadMetricData();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 	}
 	
 	public void plot() {
 		XYDataset inputData = createDataset();
-		String plotName = StudyConstants.Repo_Name + " - " + metricName;
+
+		String plotName = metricName;
 		JFreeChart chart = ChartFactory.createScatterPlot(
 				plotName, // chart title
 	            "production", // x axis label
@@ -97,11 +97,10 @@ public class MetricCorrelationVisualiser {
 		plot.setRangeAxis(testAxis);
 		
 		XYItemRenderer renderer = plot.getRenderer();
-		renderer.setSeriesShape(0, diamond);
-		renderer.setSeriesShape(1, diamond);
-		renderer.setSeriesShape(2, diamond);
-		renderer.setSeriesShape(3, diamond);
-		renderer.setSeriesShape(4, diamond);
+		for(int i = 0; i < 10; i++) {
+			//set small diamond as shape for every series we use (each commit)
+			renderer.setSeriesShape(i, diamond);
+		}
 		
 		//drawRegressionLine(chart,(XYSeriesCollection)inputData);
 		
@@ -157,13 +156,31 @@ public class MetricCorrelationVisualiser {
 	}
 	
 	
-	private XYDataset createDataset() {
-		int successCount = 0;
-		int failureCount = 0;
-		
-		maxM = 0;
-		
+	private XYDataset createDataset() {		
 	    XYSeriesCollection result = new XYSeriesCollection();
+	    for(String projectName : new String[] {"sonarqube","elasticsearch","hadoop"}) {
+	    	classPairsFilePath = String.format("../%s-%s.csv", projectName, "class-pairs");
+			monthlyMetricsFilePath = String.format("../%s-%s.csv", projectName, "monthly-metrics");
+			try {
+				loadClassPairs();
+				loadMetricData();
+				processProjectData(result);
+				resetData();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
+		
+
+	    
+		System.out.println("Max " + metricName + " found: " + maxM);
+
+	    System.out.println("Done creating dataset");
+	    
+	    return result;
+	}
+	
+	private void processProjectData(XYSeriesCollection result) {
 	   	Iterator<String> hashes = commitHashToClassPairs.keySet().iterator();
 	   	int totalVersions = commitHashToClassPairs.keySet().size();
 	   	int curVersion = 0;
@@ -173,7 +190,7 @@ public class MetricCorrelationVisualiser {
 	    	String hash = hashes.next();
 	    	XYSeries series = new XYSeries("pair in "+hash.substring(0,7));
 	    	
-	    	if(curVersion < Math.ceil(totalVersions/5)) continue;
+	    	if(curVersion < Math.ceil(totalVersions/3)) continue;
 	    	else curVersion = 0;
 	    	
 	    	List<ClassPairModel> pairs = commitHashToClassPairs.get(hash);
@@ -181,13 +198,11 @@ public class MetricCorrelationVisualiser {
 	    		Integer prodMetric = hashClassToMetric.get((hash+pair.getProductionClass()).toLowerCase());
 	    		Integer testMetric = hashClassToMetric.get((hash+pair.getTestClass()).toLowerCase());
 	    		if(testMetric == null || prodMetric == null) {
-	    			failureCount++;
 	    			continue;
 	    		}
 	    		if(testMetric > maxM || prodMetric > maxM) {
 	    			maxM = testMetric > prodMetric ? testMetric : prodMetric;
 	    		}
-	    		successCount++;
 	    		
 	    		int prodCat = CategoryAssigner.getCategory(metricName, prodMetric).ordinal();
 	    		int testCat = CategoryAssigner.getCategory(metricName, testMetric).ordinal();
@@ -195,12 +210,11 @@ public class MetricCorrelationVisualiser {
 	    	}
 	    	result.addSeries(series);
 	    }
-	    
-		System.out.println("Max " + metricName + " found: " + maxM);
-
-	    System.out.println("Done creating dataset: " + successCount + " - " + failureCount);
-	    
-	    return result;
+	}
+	
+	private void resetData() {
+		commitHashToClassPairs = new HashMap<String, List<ClassPairModel>>();
+		hashClassToMetric = new HashMap<String, Integer>();
 	}
 	
 	private double getJitter() {
