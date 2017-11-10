@@ -1,0 +1,159 @@
+\section{Research Methodology}
+In this paper we aim to identify the effects of refactoring test code on production code. In order to do this research, multiple open-source repositories were selected to analyze using a variety of available tools, in the upcoming sections we will elaborate on the chosen datasources, the chosen research tools and the research questions we attempt to answer.
+
+\subsection{Research Questions}\label{rqs}
+Below we will describe the research questions we will be answering in this paper.\\
+\indent\textbf{RQ1} \textit{What type of refactorings do developers apply on test code?}\\
+We want to identify what kind of refactoring methods developers apply to test code and see if we find any relation to the methods described in \cite{van2001refactoring}. We also want to look into the possible correlations to refactor methods applied to different types of system components.\\
+\indent\textbf{RQ2} \textit{Does the refactoring of test code affect the maintainability of production code?}\\
+We focus on refactorings of test code that significantly improved its maintainability and investigate if the maintainability of the production code under test is affected. By analysing a correlation we might be able to identify a correlation between the two, which might be a trigger to promote the practice of refactoring test code.\\
+\indent\textbf{RQ2.1} \textit{What is the effect of different test code refactoring methods on the maintainability of production code?}\\
+As a subquestion of \textbf{RQ1} it would be interesting to know which test code refactoring methods have a positive or negative effect on the maintainability of production code. This way developers can be encouraged or discouraged to use different methods, like methods described in \cite{van2001refactoring}.\\
+\indent\textbf{RQ3} \textit{What is the correlation between test code maintainability and production code maintainability?}\\
+It would generally be relevant to see if there is a direct correlation between test code maintainability and production code maintainability, this would provide a baseline to verify the validity of the answer to \textbf{RQ2}, here we could identify a general correlation as opposed to \textbf{RQ2}, so if an improvement or deterioration in test code maintainability affects the production code.
+
+\subsection{Projects under investigation}
+ This section describes the analysed datasources (ie. github repositories). All of the analysed projects are written in Java and contain an appropriate amount of test code which made them suitable for this research project. The used projects can be found in table~\ref{table:1}.\\
+ Sonarqube, Apache Hadoop and Elasticsearch were handpicked because they are repositories with at least more than 17.000 commits. The repositories exists out of multiple projects which are either maven or gradle projects, containing a production and a test directory. This project setup makes it more easier to find production/test pair files, which is very important for this research. All projects have a time span of at least 5 years and have over 150 releases, which means that there is a strong possibility that multiple refactors have been done in order to maintain the code.
+ \\
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l | l | l |l} 
+     \hline 
+     \textbf{Project name} & \thead{\textbf{Source code}\\\textbf{location}\\\tiny(https://github.com/...)\normalsize} & \thead{Prod\\files} & \thead{Test\\files} \\
+     \hline
+     SonarQube & ../SonarSource/sonarqube  & 3166 & 2085\\
+     Apache Hadoop & ../apache/hadoop & 5880 & 2498 \\ 
+     ElasticSearch & ../elastic/elasticsearch & 3667 & 1328 \\
+     \hline
+    \end{tabular}
+    \caption{An overview of the analysed projects}
+    \label{table:1}
+\end{table}\\
+
+\subsection{Research Tools}\label{Researchtools}
+To analyze these repositories, multiple tools were used to gain insight on certain properties of the code. We ended up choosing to integrate \textit{Repodriller}, \textit{CK} and \textit{Refactoring-miner} for our data collection program. With these tools we aim to create a dataset from which we can extract useful and relevant information about the correlation between refactor commits of test code and the maintainability of the production code.
+
+We used Repodriller to be able to analyse relevant commits.\footnote{https://github.com/mauricioaniche/repodriller}
+Repodriller provides an API (Application Programming Interface) which allows us to create commit 'visitors', which can in turn extract data from the commit or the repository in the state of that commit. It is also possible to specify which commits need to be visited, be it a commit range from hash to hash, be it monthly/weekly/daily or even in timespans.\\
+To be able to extract a variety of metrics from the java code in the projects that are being analysed by the 'visitors' of Repodriller, the static analysis tool CK was used\footnote{https://github.com/mauricioaniche/ck}. CK is capable of calculating the following metrics of java classes:
+
+\begin{itemize}
+\item CBO (Coupling between objects): Counts the number of dependencies a class has. The tools checks for any type used in the entire class. It ignores dependencies to Java itself (e.g. java.lang.String).
+\item DIT (Depth Inheritance Tree): It counts the number of "fathers" a class has. All classes have DIT at least 1 (everyone inherits java.lang.Object).
+\item NOC (Number of Children): The number of children a class has.
+\item NOF (Number of fields): The number of fields in a class, no matter its modifiers.
+\item NOPF (Number of public fields): The amount of public fields in a class.
+\item NOSF (Number of static fields): The amount of static fields in a class.
+\item NOM (Number of methods): The amount of methods in a class.
+\item NOPM (Number of public methods): The amount of public methods in a class.
+\item NOSM (Number of static methods): The amount of static methods in a class.
+\item NOSI (Number of static invocations): The count of invocations to static methods.
+\item RFC (Response for a Class): Counts the number of unique method invocations in a class. As invocations are resolved via static analysis, this implementation fails when a method has overloads with same number of parameters, but different types.
+\item WMC (Weight Method Class) or McCabe's complexity. It counts the number of branch instructions in a class.
+\item LOC (Lines of code): It counts the lines of code, ignoring empty lines.
+\item LCOM (Lack of Cohesion of Methods): It indicates whether a class represents a single abstraction or multiple abstractions. The idea is that if a class represents more than one abstraction, it should be refactored into more than one class, each of which represents a single abstraction.
+\end{itemize}
+We will be referring to the shorthand notations of these metrics throughout this paper.
+
+The \textit{Refactoring-miner} tool\footnote{https://github.com/tsantalis/RefactoringMiner}, which was also used and analysed in \cite{silva2016we} was used to find refactorings on commit level. The tool has a precision of 98\% and a recall of 93\%\cite{silva2016we}. It seems to give accurate refactoring information and is therefore suitable for our research. It can recognise several types of refactorings such as: 
+\begin{itemize}
+    \item Extract Method
+    \item Inline Method
+    \item Move Method/Attribute
+    \item Pull Up Method/Attribute
+    \item Push Down Method/Attribute
+    \item Extract Superclass/Interface
+    \item Move Class
+    \item Rename Class
+    \item Rename Method
+\end{itemize}
+
+%The \textit{Ref-finder} tool \cite{kim2010ref} was considered to identify commits which involved refactoring operations, being able to identify these types of changes is quite essential to be able to answer the research questions presented in the next section. Ref-finder has a reasonable accuracy and recall of 79\% and 95\% \cite{prete2010template} which assures a certain quality of the dataset under construction. Although it is capable of finding a wider variety of refactoring methods as seen in \cite{prete2010template} the tool turned out not usable in the timespan we have for this research. This was first of all due to the fact that (probably because of the age of the tool) it was hard to compile and get running in the first place, then it also had a very unsuitable API, requiring to have two versions of one repository on disk and it could only identify refactorings between those two versions. This integrated very poorly with \textit{Repodriller} and \textit{CK}. Therefore we decided to drop this tool and opt for the easier to use \textit{Refactoring-miner} tool.
+
+\subsection{Defining maintainability}
+So far we have mentioned the notion of maintainability several times, although to make this unit measurable / quantifiable we will need to give an exact definition of maintainability. In a comparative case study \cite{sjoberg2012questioning} several proposed maintainability metrics are described and analysed although all of these were proven unreliable. Therefore we have decided to give our own definition of maintainability.
+\subsubsection{Our Maintainability Metric}\label{ourmaintainabilitymetric}
+On first sight one might be tempted to use the maintainability index, however, multiple researches \cite{sjoberg2012questioning, heitlager2007practical} have indicated that the metric has also some unreliable properties. The maintainability index can be a tool to help a developer improve his/her code, but can not be used to conclude if a project/class has a high maintainability or not. This is why we have chosen to use the \textbf{LOC, NOF, WMC and NOM metrics.} \\ \indent
+Research has showed \cite{sjoberg2012questioning} that the most reliable metrics of maintainability are the size of the project and the inverse cohesion. Metrics as \textbf{LOC}, \textbf{NOF} and \textbf{NOM} all give some indication about the size of a class and are thereby more reliable for determining the maintainability. However, in order to take more than only the size of a class into consideration, we also decided to look at the \textbf{WMC}. The \textbf{WMC} metric measures the static complexity of all the methods in a class. It seems logical that the more methods a class contains, the more complex the class will get \cite{li1993object}. The \textbf{LCOM} would also be a reliable source for determining the maintainability, however the developers of \textit{CK} have indicated that the results of this metric might not be so reliable. This is why we have chosen to mainly focus on the size, while also taking the complexity into consideration. \indent
+We decided to come up with our own maintainability analysis method, based on the LOC, NOF, WMC and NOM of a java file. We will categorize these metrics into 4 catagories representing 'risk', higher risk means higher chance of having low maintainability. The categories are: "High", "Medium", "Low" and "Very Low". We base the boundaries of these categories on our own dataset, by taking the 70th, 80th and 90th quantile of the data for each of these metrics out of all the data we have collected. Each quantile represents the threshold of a category, these specific quantiles were also used by \cite{alves2010deriving}, therefore we have adopted them as well.\\This method yields us the following categories:
+
+\begin{table}[h!]
+    \centering
+    \label{categories-LOC}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Condition} & \textbf{Category} \\
+        \hline
+        x < 126 & Very Low \\
+        126 < x < 173 & Low \\
+        173 < x < 281 & Medium \\
+        281 < x & High \\
+        \hline
+    \end{tabular}
+    \caption{LOC maintainability categories}
+\end{table}
+\begin{table}[h!]
+    \centering
+    \label{categories-NOF}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Condition} & \textbf{Category} \\
+        \hline
+        x < 3 & Very Low \\
+        3 < x < 5 & Low \\
+        5 < x < 9 & Medium \\
+        9 < x & High \\
+        \hline
+    \end{tabular}
+    \caption{NOF maintainability categories}
+\end{table}
+\begin{table}[h!]
+    \centering
+    \label{categories-WMC}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Condition} & \textbf{Category} \\
+        \hline
+        x < 17 & Very Low \\
+        17 < x < 26 & Low \\
+        26 < x < 46 & Medium \\
+        46 < x & High \\
+        \hline
+    \end{tabular}
+    \caption{WMC maintainability categories}
+\end{table}
+\begin{table}[h!]
+    \centering
+    \label{categories-NOM}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Condition} & \textbf{Category} \\
+        \hline
+        x < 9 & Very Low \\
+        9 < x < 13 & Low \\
+        13 < x < 20 & Medium \\
+        20 < x & High \\
+        \hline
+    \end{tabular}
+    \caption{NOM maintainability categories}
+\end{table}
+In each of these tables x is seen as the value for the metric in a given java file, whichever condition yields true for this value assigns the matching category to this java file. The data used to get these values is elaborated on in section \ref{constructed-dataset}. We use these categories as our metrics for maintainability.
+
+\subsection{Constructed dataset}\label{constructed-dataset}
+The constructed dataset consists of data extracted from test- and production code file pairs from both refactor commits and of several releases per codebase. In addition to this some timespan after significant refactor commits some measure points were also included for validation purposes. For each extracted commit we calculate maintainability metrics defined in section \ref{ourmaintainabilitymetric} before and after the operation. 
+Based on the accuracy/quality of the dataset we may or may not have to do some manual validation or extension of the data, e.g. add types for refactorings or validate if we need to filter out false-positives on automatically identified refactor commits. \\ \indent
+Because some of the data which we have to collect is dependent on other data, we decided that the output should consist out of multiple CSV files. For each repository there are 5 different CSV files, all containing parts of the necessary information:
+\begin{itemize}
+\item The class-pair file\\
+This file contains all the production-test pairs of a project. Each row consists out of a pair containing the absolute path to the related files. This file serves as a lookup table to find the correlating pair file given a test or production class.
+\item The monthly metrics file\\
+This file contains all the \textit{CK} metrics of all files in a project. It consists out of the type of each file (production or test), the absolute path to each file and all the \textit{CK} metrics. The type of the file together with the related \textit{CK} metrics are necessary to understand the difference between the maintainability of the production code and the test code. 
+\item The test refactors file\\
+This file contains all the (\textit{refactorminer}) refactorings which were applied on test files. It consists out of the information whether the refactor is on method or class level and the name of the refactor method. This information is necessary to understand what kind of refactor methods are used during a project (\textbf{RQ1})
+\item The versioned test refactors file\\
+This file contains all the refactors on the test code including the data on the previous and new version of this file. It consists out the absolute path to the file, the related \textit{CK} metrics (for both versions) and the refactor method which was used.
+\item The impact production file\\
+This file consists out the related production files of the versioned test refactors file. For each file which is found in the significant refactors file, we calculate the \textit{CK} metrics of the related production file of up to 50 commits ahead. With this information we can identify whether the refactoring of the test code had any impact on the maintainability of the production code (\textbf{RQ2}).
+\end{itemize}
+Each of these files contains the commithashes of all processed commits in order to link the related information back to the commit. The monthly metrics and the class-pair file consists out of monthly commits during the whole repository. The test refactors, versioned test refactors and impact production files all consists out of the whole commit list of the past 5 years.

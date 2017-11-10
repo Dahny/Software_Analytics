@@ -1,0 +1,26 @@
+\subsubsection{The Maintainability Index} The Maintainability Index (MI) has been proposed as a metric for assessing the maintainability of software systems. It uses a polynomial function based on three metrics. These metrics are Lines of Code (LOC), Cyclomatic Complexity or McCabe's complexity (WMC) and Halstead Volume (HV). The first two metrics can be calculated by \textit{CK} however Halstead Volume is missing, we can calculate this from an Abstract Syntax Tree provided by for example the Eclipse JDT\footnote{http://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation\_AST/index.html}. This measure has also been adopted by Microsoft Visual Studio\footnote{https://blogs.msdn.microsoft.com/zainnab/2011/05/26/code-metrics-maintainability-index/}, however they adopted a slightly different formula which maps the maintainability to a value between 0 and 100\footnote{https://blogs.msdn.microsoft.com/codeanalysis/2007/11/20/ maintainability-index-range-and-meaning/}. The resulting formula being
+\begin{displaymath}
+I = 171 - 5.2 * ln(HV) - 0.23 * (WMC) - 16.2 * ln(LOC)
+\end{displaymath}
+\begin{displaymath}
+MI = MAX(0,I*100 / 171)
+\end{displaymath}
+
+The reasoning behind this is that they deemed the difference between some negative value and 0 not useful. The resulting index values are mapped as follows:
+\begin{itemize}
+    \item 0-9 = low maintainability
+    \item 10-19 = medium maintainability
+    \item 20-100 = high maintainability
+\end{itemize}
+This adaption can be justified as the original unit was defined for non-Object Oriented languages such as C, while this adapted unit also applies to Object Oriented (OO) languages as C\# and Visual Basic. Since this version is adapted to OO languages it might be suitable for Java code analysis as well. However, no measurement results regarding their MI adaption have been published by Microsoft.
+\subsubsection{Structural Measures}
+The Structural Measures are a set of code metrics that include the CK set, these measures include:
+\begin{itemize}
+    \item OMMIC - Calls to methods in an unrelated class
+    \item TCC - Tight Class Cohesion
+    \item WMC1 - Number of methods per class
+    \item DIT - Depth of Inheritance Tree
+\end{itemize}
+Where DIT and WMC1 are present in the set of CK measures, note however that WMC1 is not called WMC but NOM in the specifications of the CK tool we proposed to use. An analysed system can be judged on each of these metrics separately and when comparing two systems the most maintainable one can be derived by a majority vote of which metrics are 'lowest' the system with the most 'lowest' metrics is deemed the most maintainable one.
+\subsubsection{Code Smells}
+The concept of code smells was introduced as an indicator of problems with the software design\cite{sjoberg2012questioning}. We will directly elaborate on why we do not think this is a suitable metric for our study. Simply because it is defined for system level analysis, while we are doing class level analysis. Plenty of classes will not contain these code smells and will therefore be deemed maintainable. Therefore we immediately discard this option.
